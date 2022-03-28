@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 15:32:11 by smun              #+#    #+#             */
-/*   Updated: 2022/03/28 21:26:55 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/28 21:29:04 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,7 +126,10 @@ void    Session::Close()
 {
     int events = IOEvent_Read;
     if (_sendTriggered)
+    {
         events |= IOEvent_Write;
+        _sendTriggered = false;
+    }
     _attachedChannel->SetEvent(GetSocket(), events, IOFlag_Remove, this);
 }
 

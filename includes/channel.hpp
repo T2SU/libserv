@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 14:43:33 by smun              #+#    #+#             */
-/*   Updated: 2022/03/28 20:29:49 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/28 21:15:08 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,6 @@ private:
     void    Accept();
     void    Read(Session* session);
     void    Write(Session* session);
-    void    Close(Session* session);
 
     void    ReleaseSocket(int fd);
 
@@ -50,6 +49,7 @@ public:
 
     void    Init();
     void    BindAndListen();
+    void    Close(Session* session);
 
     void    Run();
     void    SetEvent(int fd, int events, int flags, Context* context);

@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 14:49:17 by smun              #+#    #+#             */
-/*   Updated: 2022/03/28 21:04:57 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/28 21:22:17 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <cstdio>
+#include <cerrno>
 
 Channel::Channel(int port)
     : _listenPort(port)
@@ -90,7 +91,7 @@ void    Channel::BindAndListen()
 
 void    Channel::SetEvent(int fd, int events, int flags, Context* context)
 {
-    kevent64_s  ev[3];
+    kevent64_s  ev[2];
     int         eventNum = 0;
     int         eventFlags = 0;
 
@@ -109,13 +110,14 @@ void    Channel::SetEvent(int fd, int events, int flags, Context* context)
          EV_SET64(&ev[eventNum++], fd, EVFILT_READ, eventFlags, 0, 0, reinterpret_cast<uint64_t>(context), 0, 0);
     if (events & IOEvent_Write)
          EV_SET64(&ev[eventNum++], fd, EVFILT_WRITE, eventFlags, 0, 0, reinterpret_cast<uint64_t>(context), 0, 0);
-    if (events & IOEvent_Custom)
-         EV_SET64(&ev[eventNum++], fd, EVFILT_USER, eventFlags, 0, 0, reinterpret_cast<uint64_t>(context), 0, 0);
 
     // 실제 kqueue에 이벤트를 등록 또는 삭제 요청.
     int evregist = kevent64(_eventfd, ev, eventNum, NULL, 0, 0, NULL);
     if (evregist < 0)
+    {
+        int err = errno; (void)err;
         throw std::runtime_error("kevent64() failed");
+    }
 }
 
 void    Channel::Accept()
@@ -202,10 +204,6 @@ void    Channel::Run()
                 // 데이터 쓰기
                 else if (filter == EVFILT_WRITE)
                     Write(dynamic_cast<Session*>(context));
-
-                // 클라이언트 종료 이벤트
-                else if (filter == EVFILT_USER)
-                    Close(dynamic_cast<Session*>(context));
             }
 
             // 예외 처리

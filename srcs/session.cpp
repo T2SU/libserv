@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 15:32:11 by smun              #+#    #+#             */
-/*   Updated: 2022/03/28 21:05:48 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/28 21:26:55 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 #include <sys/socket.h>
 #include <cstring>
 #include <string>
-#include <errno.h>
+#include <cerrno>
 #include <memory>
 
 Session::Session(Channel* channel, int socketfd, int socketId, const std::string& addr)
@@ -45,7 +45,7 @@ Session::Session(const Session& s)
 
 Session::~Session()
 {
-    _attachedChannel->SetEvent(GetSocket(), IOEvent_Read | IOEvent_Write | IOEvent_Custom, IOFlag_Remove, NULL);
+    _attachedChannel->SetEvent(GetSocket(), IOEvent_Read | IOEvent_Write, IOFlag_Remove, NULL);
     Log::V("Deleted session instance. (socket-%d/%s)", GetSocket(), GetRemoteAddress().c_str());
 }
 
@@ -75,7 +75,7 @@ void    Session::OnRead()
         if (bytes < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
             return;
         Log::D("Socket closed from Session::OnRead errno:%d (socket-%d/%s)", errno, GetSocket(), GetRemoteAddress().c_str());
-        TriggerClose();
+        Close();
         return;
     }
     AppendBuffer(buffer, static_cast<size_t>(bytes));
@@ -100,7 +100,7 @@ void    Session::OnWrite()
         if (bytes < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
             return;
         Log::D("Socket closed from Session::OnWrite errno:%d (socket-%d/%s)", errno, GetSocket(), GetRemoteAddress().c_str());
-        TriggerClose();
+        Close();
         return;
     }
     TakeBuffer(static_cast<size_t>(bytes));
@@ -122,10 +122,12 @@ void    Session::TakeBuffer(size_t bytes)
     Log::V("Taken %llu bytes from buffer. (socket-%d/%s)", bytes, GetSocket(), GetRemoteAddress().c_str());
 }
 
-void    Session::TriggerClose()
+void    Session::Close()
 {
-    _attachedChannel->SetEvent(GetSocket(), IOEvent_Read | IOEvent_Write, IOFlag_Remove, this);
-    _attachedChannel->SetEvent(GetSocket(), IOEvent_Custom, IOFlag_Add | IOFlag_Enable, this);
+    int events = IOEvent_Read;
+    if (_sendTriggered)
+        events |= IOEvent_Write;
+    _attachedChannel->SetEvent(GetSocket(), events, IOFlag_Remove, this);
 }
 
 void    Session::Process(const std::string& line)

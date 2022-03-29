@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 15:26:59 by smun              #+#    #+#             */
-/*   Updated: 2022/03/28 21:12:25 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 12:34:35 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ private:
     ByteBuffer          _recvBuffer;
     ByteBuffer          _sendBuffer;
 
-    bool                _sendTriggered;
+    int                 _triggeredEvents;
 
     Session();
     Session(const Session&);

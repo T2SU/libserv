@@ -1,6 +1,4 @@
-#include "std.hpp"
-#include "log.hpp"
-#include "channel.hpp"
+#include "ft_irc.hpp"
 
 int main(int argc, char* argv[])
 {

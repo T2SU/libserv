@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 15:32:11 by smun              #+#    #+#             */
-/*   Updated: 2022/03/29 18:44:05 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 18:44:49 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,7 +125,8 @@ static void split_arguments(std::vector<const std::string>& args, const std::str
     std::istringstream iss(line);
     std::string s;
     while (std::getline(iss, s, ' '))
-        args.push_back(s);
+        if (!s.empty())
+            args.push_back(s);
 }
 
 static int    mini_stoi(const std::string& str)

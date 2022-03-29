@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   channel.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
+/*   By: smun <smun@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 14:49:17 by smun              #+#    #+#             */
-/*   Updated: 2022/03/29 13:24:13 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 15:49:52 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,7 +79,7 @@ void    Channel::BindAndListen()
     Log::Dp("Channel::BindAndListen", "포트 바인딩에 성공했습니다. (Port %d)", _listenPort);
 
     // 4. 연결을 수락하기 시작. (backlog: 20)
-    int listenres = ::listen(listenfd, 20);
+    int listenres = listen(listenfd, 20);
     if (listenres < 0)
         throw std::runtime_error("listen() 함수 호출 실패");
     _listenContext = new Context(this, listenfd);

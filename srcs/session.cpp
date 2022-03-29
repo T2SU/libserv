@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   session.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
+/*   By: smun <smun@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 15:32:11 by smun              #+#    #+#             */
-/*   Updated: 2022/03/29 13:28:50 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 15:46:20 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,7 +85,7 @@ void    Session::AppendBuffer(Byte* buffer, size_t bytes)
 
 void    Session::OnWrite()
 {
-    ssize_t bytes = send(GetSocket(), _sendBuffer.data(), _sendBuffer.size(), 0);
+    ssize_t bytes = send(GetSocket(), _sendBuffer.data(), _sendBuffer.size(), 0); // 3bytes, 17bytes
     if (bytes < 0)
     {
         if (bytes < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
@@ -108,7 +108,7 @@ void    Session::TakeBuffer(size_t bytes)
     const ByteBufferIterator begin  = _sendBuffer.begin();
     const ByteBufferIterator end    = _sendBuffer.begin() + bytes;
 
-    _sendBuffer.erase(begin, end);
+    _sendBuffer.erase(begin, end); // 3bytes 삭제!! 나나머지 47바이트는 남아있습니다! / 17bytes 나머지 30바이트는 남아있습니다....
     Log::Vp("Session::TakeBuffer", "[%d/%s] 세션의 송신 버퍼에서 %llu 바이트를 꺼냈습니다. (현재 남은 바이트: %llu)", GetSocket(), GetRemoteAddress().c_str(), bytes, _sendBuffer.size());
 }
 

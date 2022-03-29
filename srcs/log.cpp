@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 15:43:03 by smun              #+#    #+#             */
-/*   Updated: 2022/03/24 20:58:12 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 13:13:42 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,11 +58,18 @@ static void print_time()
 
 void    Log::Printf(int level, const char* format, va_list& va)
 {
+    Printfp(level, "", format, va);
+}
+
+void    Log::Printfp(int level, const char* prefix, const char* format, va_list& va)
+{
     std::cout << "[";
     print_time();
     std::cout << "] ";
     std::cout << std::setw(5 + 9) << std::left << GetPrefix(level);
-    std::cout << " ";
+    std::cout << " [";
+    std::cout << std::setw(22) << std::left << prefix;
+    std::cout << "] ";
     std::vfprintf(stdout, format, va);
     std::fflush(stdout);
     std::cout << GetPrefix(-1);
@@ -78,3 +85,10 @@ void    Log::I(const char* format, ...) { VBEGIN; Printf(LogLevel_Info, format, 
 void    Log::W(const char* format, ...) { VBEGIN; Printf(LogLevel_Warning, format, va); VEND; }
 void    Log::E(const char* format, ...) { VBEGIN; Printf(LogLevel_Error, format, va); VEND; }
 void    Log::F(const char* format, ...) { VBEGIN; Printf(LogLevel_Fatal, format, va); VEND; }
+
+void    Log::Vp(const char* prefix, const char* format, ...) { VBEGIN; Printfp(LogLevel_Verbose, prefix, format, va); VEND; }
+void    Log::Dp(const char* prefix, const char* format, ...) { VBEGIN; Printfp(LogLevel_Debug, prefix, format, va); VEND; }
+void    Log::Ip(const char* prefix, const char* format, ...) { VBEGIN; Printfp(LogLevel_Info, prefix, format, va); VEND; }
+void    Log::Wp(const char* prefix, const char* format, ...) { VBEGIN; Printfp(LogLevel_Warning, prefix, format, va); VEND; }
+void    Log::Ep(const char* prefix, const char* format, ...) { VBEGIN; Printfp(LogLevel_Error, prefix, format, va); VEND; }
+void    Log::Fp(const char* prefix, const char* format, ...) { VBEGIN; Printfp(LogLevel_Fatal, prefix, format, va); VEND; }

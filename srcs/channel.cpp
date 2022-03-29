@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 14:49:17 by smun              #+#    #+#             */
-/*   Updated: 2022/03/29 12:28:14 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 13:11:54 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ Channel::~Channel()
 {
     delete _listenContext;
     close(_eventfd);
-    Log::V("Deleted channel instance");
+    Log::Vp("Channel::~Channel", "채널 인스턴스가 삭제됩니다.");
 }
 
 void    Channel::Init()
@@ -49,7 +49,7 @@ void    Channel::Init()
     _eventfd = kqueue();
     if (_eventfd < 0)
         throw std::runtime_error("failed kqueue()");
-    Log::V("Created kqueue fd (%d)", _eventfd);
+    Log::Vp("Channel::Init", "kqueue 핸들을 받았습니다. (%d)", _eventfd);
 }
 
 void    Channel::BindAndListen()
@@ -57,11 +57,11 @@ void    Channel::BindAndListen()
     // 1. 소켓 생성
     int listenfd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (listenfd < 0)
-        throw std::runtime_error("failed socket() for binding port");
+        throw std::runtime_error("포트 바인딩을 위한 socket() 함수 호출 실패");
     int enable = 1;
     if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
-        throw std::runtime_error("failed setsockopt(SO_REUSEADDR, 1) for binding port");
-    Log::V("Created listen sockket fd. (%d)", listenfd);
+        throw std::runtime_error("포트 바인딩을 위한 setsockopt(SO_REUSEADDR, 1) 함수 호출 실패");
+    Log::Vp("Channel::BindAndListen", "연결 수락(listen) 소켓을 생성했습니다. (%d)", listenfd);
 
     // 2. 포트 바인딩을 위해 sockaddr 구조체 설정.
     sockaddr_in addr;
@@ -69,21 +69,21 @@ void    Channel::BindAndListen()
     addr.sin_family = PF_INET;
     addr.sin_port = htons(_listenPort);
     addr.sin_addr.s_addr = INADDR_ANY;
-    Log::V("Defined sockaddr for binding port. (Port %d)", _listenPort);
+    Log::Vp("Channel::BindAndListen", "포트 바인딩을 위해 sockaddr 구조체가 설정되었습니다. (Port %d)", _listenPort);
 
     // 3. 포트 바인딩
     sockaddr* paddr = reinterpret_cast<sockaddr*>(&addr);
     int bindres = bind(listenfd, paddr, sizeof(*paddr));
     if (bindres < 0)
-        throw std::runtime_error("failed bind()");
-    Log::D("Bound port for listen. (Port %d)", _listenPort);
+        throw std::runtime_error("bind() 함수 호출 실패");
+    Log::Dp("Channel::BindAndListen", "포트 바인딩에 성공했습니다. (Port %d)", _listenPort);
 
     // 4. 연결을 수락하기 시작. (backlog: 20)
     int listenres = ::listen(listenfd, 20);
     if (listenres < 0)
-        throw std::runtime_error("failed listen()");
+        throw std::runtime_error("listen() 함수 호출 실패");
     _listenContext = new Context(this, listenfd);
-    Log::I("Listening on port %d.", _listenPort);
+    Log::Ip("Channel::BindAndListen", "포트 %d에서 연결을 대기중입니다.", _listenPort);
 
     // 5. 연결을 수락하기 위해, kqueue에 read 이벤트 등록.
     SetEvent(listenfd, IOEvent_Read, IOFlag_Add | IOFlag_Enable, _listenContext);
@@ -114,10 +114,7 @@ void    Channel::SetEvent(int fd, int events, int flags, Context* context)
     // 실제 kqueue에 이벤트를 등록 또는 삭제 요청.
     int evregist = kevent64(_eventfd, ev, eventNum, NULL, 0, 0, NULL);
     if (evregist < 0)
-    {
-        int err = errno; (void)err;
-        throw std::runtime_error("kevent64() failed");
-    }
+        throw std::runtime_error("kevent64() 함수 호출 실패");
 }
 
 void    Channel::Accept()
@@ -130,7 +127,7 @@ void    Channel::Accept()
     int clientfd = accept(_listenContext->GetSocket(), reinterpret_cast<sockaddr*>(&remoteaddr), &remoteaddr_size);
     if (clientfd < 0)
     {
-        Log::E("accept() failed.");
+        Log::Ep("Channel::Accept", "accept() 함수 호출 실패");
         return;
     }
 
@@ -141,35 +138,35 @@ void    Channel::Accept()
         const std::string& addr = inet_ntoa(remoteaddr.sin_addr);
         SharedPtr<Session> session = SharedPtr<Session>(new Session(this, clientfd, socketId, addr));
         _sessions[socketId] = session;
-        Log::I("Incoming a connection from %s", addr.c_str());
+        Log::Ip("Channel::Accept", "%s 에서 연결이 들어왔습니다.", addr.c_str());
         SetNonBlock(clientfd);
         SetEvent(clientfd, IOEvent_Read, IOFlag_Add | IOFlag_Enable, session.Load());
     }
     catch (std::exception& ex)
     {
         // 세션 인스턴스 생성 및 등록에 실패할 경우, 에러 출력.
-        Log::F("Failed to create new client session. (%s)", ex.what());
+        Log::Fp("Channel::Accept", "새로운 클라이언트 세션 인스턴스를 생성할 수 없었습니다. (%s)", ex.what());
     }
 }
 
 void    Channel::Read(Session* session)
 {
-    if (session == NULL) throw std::runtime_error("Channel::Read not called as parameter session.");
-    Log::V("Channel::Read socket-%d", session->GetSocket());
+    if (session == NULL) throw std::runtime_error("Channel::Read 함수로 전달된 포인터가 세션 인스턴스를 가리키고 있지 않습니다.");
+    Log::Vp("Channel::Read", "[%d/%s] 읽기 이벤트가 발생되었습니다.", session->GetSocket(), session->GetRemoteAddress().c_str());
     session->OnRead();
 }
 
 void    Channel::Write(Session* session)
 {
-    if (session == NULL) throw std::runtime_error("Channel::Write not called as parameter session.");
-    Log::V("Channel::Write socket-%d", session->GetSocket());
+    if (session == NULL) throw std::runtime_error("Channel::Write 함수로 전달된 포인터가 세션 인스턴스를 가리키고 있지 않습니다.");
+    Log::Vp("Channel::Write", "[%d/%s] 쓰기 이벤트가 발생되었습니다.", session->GetSocket(), session->GetRemoteAddress().c_str());
     session->OnWrite();
 }
 
 void    Channel::Close(Session* session)
 {
-    if (session == NULL) throw std::runtime_error("Channel::Close not called as parameter session.");
-    Log::V("Channel::Close socket-%d", session->GetSocket());
+    if (session == NULL) throw std::runtime_error("Channel::Close 함수로 전달된 포인터가 세션 인스턴스를 가리키고 있지 않습니다.");
+    Log::Vp("Channel::Close", "[%d/%s] 세션을 채널에서 해제합니다.", session->GetSocket(), session->GetRemoteAddress().c_str());
     _sessions.erase(session->GetSocketId());
 }
 
@@ -209,7 +206,7 @@ void    Channel::Run()
             // 예외 처리
             catch (const std::exception& ex)
             {
-                Log::F("Socket event error was occurred: [%s]", ex.what());
+                Log::Fp("Channel::Run", "소켓 이벤트 처리 중 오류가 발생했습니다. [%s]", ex.what());
             }
         }
     }

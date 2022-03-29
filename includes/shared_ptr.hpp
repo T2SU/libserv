@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/28 20:11:55 by smun              #+#    #+#             */
-/*   Updated: 2022/03/28 20:56:04 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 13:12:13 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,19 +35,19 @@ public:
 			return;
 		if (--(*_ref) == 0)
 		{
-			Log::V("SharedPtr remaining ref count=0. initiated deletion");
+			Log::Vp("SharedPtr::~SharedPtr", "공유 포인터가 삭제되었습니다. 내부 포인터의 삭제를 시작합니다. (남은 참조 카운트:0)");
 			delete _ref;
 			delete _ptr;
 		}
 		else
-			Log::V("SharedPtr decreased ref count. remaining ref count=%d. ", *_ref);
+			Log::Vp("SharedPtr::~SharedPtr", "공유 포인터가 삭제되었습니다. 참조 카운트를 1 낮춥니다. (남은 참조 카운트:%d)", *_ref);
 	}
 
 	SharedPtr(T* ptr)
 		: _ptr(ptr)
 		, _ref(new int(1))
 	{
-		Log::V("SharedPtr Initiated. ref count=1");
+		Log::Vp("SharedPtr::SharedPtr", "공유 포인터가 생성되었습니다. (남은 참조 카운트:1)");
 	}
 
 	SharedPtr(const SharedPtr& s)
@@ -57,7 +57,7 @@ public:
 		if (s._ref == NULL)
 			return;
 		++(*_ref);
-		Log::V("SharedPtr copied. remaining ref count=%d", *_ref);
+		Log::Vp("SharedPtr::SharedPtr", "공유 포인터가 복사되었습니다. (남은 참조 카운트:%d)", *_ref);
 	}
 
 	SharedPtr& operator= (const SharedPtr& s)
@@ -68,7 +68,7 @@ public:
 		_ptr = s._ptr;
 		_ref = s._ref;
 		++(*_ref);
-		Log::V("SharedPtr assigned. remaining ref count=%d", *_ref);
+		Log::Vp("SharedPtr::operator=", "공유 포인터가 대입되었습니다. (남은 참조 카운트:%d)", *_ref);
 		return *this;
 	}
 

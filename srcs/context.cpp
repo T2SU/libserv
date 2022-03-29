@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 15:18:07 by smun              #+#    #+#             */
-/*   Updated: 2022/03/28 17:10:30 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 13:12:00 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ Context::Context(const Context& ctx)
 Context::~Context()
 {
     close(_socketfd);
-    Log::V("Deleted context instance. (fd: %d)", _socketfd);
+    Log::Vp("Context::~Context", "[%d] 컨텍스트 인스턴스가 삭제됩니다.", _socketfd);
 }
 
 int Context::GetSocket() const

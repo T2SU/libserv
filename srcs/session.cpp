@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 15:32:11 by smun              #+#    #+#             */
-/*   Updated: 2022/03/29 12:43:37 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 13:14:55 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,18 +29,7 @@ Session::Session(Channel* channel, int socketfd, int socketId, const std::string
     , _sendBuffer()
     , _triggeredEvents(0)
 {
-    Log::V("Created session instance. (socket-%d/%s)", GetSocket(), GetRemoteAddress().c_str());
-}
-
-Session::Session(const Session& s)
-    : Context(s)
-    , _socketId(s._socketId)
-    , _remoteAddress(s._remoteAddress)
-    , _recvBuffer(s._recvBuffer)
-    , _sendBuffer(s._sendBuffer)
-    , _triggeredEvents(0)
-{
-    Log::V("Copied session instance. (socket-%d/%s)", GetSocket(), GetRemoteAddress().c_str());
+    Log::Vp("Session::Session", "[%d/%s] 세션 인스턴스를 생성합니다.", GetSocket(), GetRemoteAddress().c_str());
 }
 
 Session::~Session()
@@ -48,7 +37,7 @@ Session::~Session()
     if (_triggeredEvents)
         _attachedChannel->SetEvent(GetSocket(), _triggeredEvents, IOFlag_Remove, NULL);
     _triggeredEvents &= ~_triggeredEvents;
-    Log::V("Deleted session instance. (socket-%d/%s)", GetSocket(), GetRemoteAddress().c_str());
+    Log::Vp("Session::~Session", "[%d/%s] 세션 인스턴스가 삭제됩니다.", GetSocket(), GetRemoteAddress().c_str());
 }
 
 bool    Session::GetNextLine(ByteBuffer& buffer, std::string& line)
@@ -77,7 +66,7 @@ void    Session::OnRead()
     {
         if (bytes < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
             return;
-        Log::D("Socket closed from Session::OnRead errno:%d (socket-%d/%s)", errno, GetSocket(), GetRemoteAddress().c_str());
+        Log::Dp("Session::OnRead", "[%d/%s] 원격 연결이 끊어졌습니다. 세션 종료를 시작합니다. errno:%d", GetSocket(), GetRemoteAddress().c_str(), errno);
         Close();
         return;
     }
@@ -92,7 +81,7 @@ void    Session::AppendBuffer(Byte* buffer, size_t bytes)
 {
     _recvBuffer.reserve(_recvBuffer.size() + bytes);
     _recvBuffer.insert(_recvBuffer.end(), &buffer[0], &buffer[bytes]);
-    Log::V("Appended %llu bytes into buffer. (current: %llu bytes) (socket-%d/%s)", bytes, _recvBuffer.size(), GetSocket(), GetRemoteAddress().c_str());
+    Log::Vp("Session::AppendBuffer", "[%d/%s] 세션의 수신 버퍼에 %llu 바이트를 더했습니다. (현재 총 바이트: %llu)", GetSocket(), GetRemoteAddress().c_str(), bytes, _recvBuffer.size());
 }
 
 void    Session::OnWrite()
@@ -102,14 +91,14 @@ void    Session::OnWrite()
     {
         if (bytes < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
             return;
-        Log::D("Socket closed from Session::OnWrite errno:%d (socket-%d/%s)", errno, GetSocket(), GetRemoteAddress().c_str());
+        Log::Dp("Session::OnWrite", "[%d/%s] 원격 연결이 끊어졌습니다. 세션 종료를 시작합니다. errno:%d", GetSocket(), GetRemoteAddress().c_str(), errno);
         Close();
         return;
     }
     TakeBuffer(static_cast<size_t>(bytes));
     if (_sendBuffer.empty())
     {
-        Log::V("Send buffer is empty. disable send io flag (socket-%d/%s)", GetSocket(), GetRemoteAddress().c_str());
+        Log::Vp("Session::OnWrite", "[%d/%s] 세션의 송신 버퍼가 비었습니다. 송신 IO 플래그를 해제합니다.", GetSocket(), GetRemoteAddress().c_str());
         _attachedChannel->SetEvent(GetSocket(), IOEvent_Write, IOFlag_Disable, this);
         _triggeredEvents &= ~IOEvent_Write;
     }
@@ -121,7 +110,7 @@ void    Session::TakeBuffer(size_t bytes)
     const ByteBufferIterator end    = _sendBuffer.begin() + bytes;
 
     _sendBuffer.erase(begin, end);
-    Log::V("Taken %llu bytes from buffer. (socket-%d/%s)", bytes, GetSocket(), GetRemoteAddress().c_str());
+    Log::Vp("Session::TakeBuffer", "[%d/%s] 세션의 송신 버퍼에서 %llu 바이트를 꺼냈습니다. (현재 남은 바이트: %llu)", GetSocket(), GetRemoteAddress().c_str(), bytes, _sendBuffer.size());
 }
 
 void    Session::Close()

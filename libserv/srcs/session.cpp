@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 15:32:11 by smun              #+#    #+#             */
-/*   Updated: 2022/03/29 17:45:08 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 18:22:21 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,9 @@
 #include <string>
 #include <cerrno>
 #include <memory>
+#include <sstream>
+#include <iostream>
+#include <vector>
 
 Session::Session(Channel* channel, int socketfd, int socketId, const std::string& addr)
     : Context(channel, socketfd)
@@ -46,7 +49,7 @@ bool    Session::GetNextLine(ByteBuffer& buffer, std::string& line)
     const ByteBufferIterator end = buffer.end();
     ByteBufferIterator lineEnd;
 
-    lineEnd = std::search(begin, end, CRLF, CRLF + CRLF_SIZE);
+    lineEnd = std::search(begin, end, CRLF, &CRLF[CRLF_SIZE]);
     if (lineEnd != end)
     {
         line.assign(begin, lineEnd);
@@ -117,9 +120,82 @@ void    Session::Close()
     _attachedChannel->Close(this);
 }
 
+static void split_arguments(std::vector<const std::string>& args, const std::string& line)
+{
+    std::istringstream iss(line);
+    std::string s;
+    while (std::getline(iss, s, ' '))
+        args.push_back(s);
+}
+
+static int    mini_stoi(const std::string& str)
+{
+    std::istringstream ss(str);
+    int n;
+    ss >> n;
+    if (ss.fail())
+        throw std::runtime_error("Not integer");
+    return n;
+}
+
+static std::string join_strings(
+    std::vector<const std::string>::const_iterator begin,
+    std::vector<const std::string>::const_iterator end)
+{
+    std::ostringstream oss;
+    while (begin != end)
+    {
+        oss << *begin;
+        ++begin;
+        if (begin != end)
+            oss << ' ';
+    }
+    return oss.str();
+}
+
 void    Session::Process(const std::string& line)
 {
     Log::Ip("Session::Process", "[R/%s] %s", _remoteAddress.c_str(), line.c_str());
+
+    // 날아온 한 줄 처리
+    std::vector<const std::string> args;
+
+    // 한 줄에서 스페이스 문자로 구분
+    split_arguments(args, line);
+
+    if (args[0] == "HELLO")
+    {
+        try
+        {
+            if (args.size() < 2)
+                throw std::runtime_error("No parameter with HELLO.");
+            Send("HELLO Your name is " + args[1] + "!! Welcome to my server :)");
+        }
+        catch (const std::exception& ex)
+        {
+            Send(ex.what());
+        }
+    }
+    else if (args[0] == "MESSAGE")
+    {
+        try
+        {
+            if (args.size() < 3)
+                throw std::runtime_error("Lacked parameter with MESSAGE.");
+            int targetId = mini_stoi(args[1]);
+            std::string message = join_strings(args.begin() + 2, args.end());
+            Session& target = _attachedChannel->FindSession(targetId);
+            target.Send("MESSAGE " + message);
+        }
+        catch (const std::exception& ex)
+        {
+            Send(ex.what());
+        }
+    }
+    else
+    {
+        Send("Unknown command " + args[0]);
+    }
 }
 
 void    Session::Send(const std::string& line)
@@ -133,7 +209,7 @@ void    Session::Send(const void* buf, size_t len)
     const Byte* const bytebuf = reinterpret_cast<const Byte*>(buf);
 
     _sendBuffer.insert(_sendBuffer.end(), bytebuf, bytebuf + len);
-    _sendBuffer.insert(_sendBuffer.end(), CRLF, CRLF + CRLF_SIZE);
+    _sendBuffer.insert(_sendBuffer.end(), CRLF, &CRLF[CRLF_SIZE]);
     if (!(_triggeredEvents & IOEvent_Write))
     {
         _triggeredEvents |= IOEvent_Write;

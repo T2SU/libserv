@@ -6,26 +6,23 @@
 #    By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/03/24 12:21:35 by smun              #+#    #+#              #
-#    Updated: 2022/03/28 20:43:39 by smun             ###   ########.fr        #
+#    Updated: 2022/03/29 18:18:24 by smun             ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-CC = c++-11
+CC = c++
 CFLAGS = -Wall -Wextra -Werror -std=c++98 -fsanitize=address -g
 RM = rm
 RMFLAGS = -f
 
-SRCS = main \
-		channel \
-		context \
-		log \
-		session
-INC = -I./includes
+SRCS = main
+INC = -I./libserv/includes -I./
 
-FINAL_SRCS = $(addprefix srcs/, $(addsuffix .cpp, $(SRCS)))
+LIBSERV_SRCS = ./libserv/srcs/context ./libserv/srcs/channel ./libserv/srcs/log ./libserv/srcs/session
+FINAL_SRCS = $(addsuffix .cpp, $(SRCS) $(LIBSERV_SRCS))
 FINAL_OBJS = $(FINAL_SRCS:.cpp=.o)
 
-NAME = libserv.out
+NAME = ircserv
 
 all: $(NAME)
 

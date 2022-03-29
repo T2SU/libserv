@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 14:49:17 by smun              #+#    #+#             */
-/*   Updated: 2022/03/29 17:45:50 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 17:58:36 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,4 +218,12 @@ void    Channel::SetNonBlock(int socketfd)
     int setfcntlres = fcntl(socketfd, F_SETFL, O_NONBLOCK);
     if (setfcntlres < 0)
         throw std::runtime_error("failed fcntl() for set nonblocking flag");
+}
+
+Session&    Channel::FindSession(int sessionKey)
+{
+    SessionMapIterator found = _sessions.find(sessionKey);
+    if (found == _sessions.end())
+        throw std::runtime_error("Not found session");
+    return *(found->second.Load());
 }

@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 14:43:33 by smun              #+#    #+#             */
-/*   Updated: 2022/03/29 17:45:58 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 17:57:21 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -185,6 +185,16 @@ public:
      * @exception 등록 도는 해제가 일부라도 실패할 경우 std::runtime_error 예외가 발생합니다.
      */
     void    SetEvent(int fd, int events, int flags, Context* context);
+
+    /**
+     * @brief 특정 세션 ID로 세션을 찾습니다.
+     *
+     * @param sessionKey 세션 ID
+     * @return 세션을 발견하면 세션 ID가 발견되며, 찾지 못했다면 std::runtime_error 예외가 발생합니다.
+     * @exception 세션을 발견하지 못하면 std::runtime_error 예외가 발생합니다.
+     */
+    Session&    FindSession(int sessionKey);
+    Session&    FindSession(const std::string& user);
 
     /**
      * @brief 소켓을 논블로킹 소켓으로 설정합니다. (과제 참조!)

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   context.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
+/*   By: smun <smun@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 15:18:07 by smun              #+#    #+#             */
-/*   Updated: 2022/03/29 13:12:00 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 17:04:34 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,6 @@
 Context::Context(Channel* channel, int fd)
     : _socketfd(fd)
     , _attachedChannel(channel)
-{
-}
-
-Context::Context(const Context& ctx)
-    : _socketfd(ctx._socketfd)
-    , _attachedChannel(ctx._attachedChannel)
 {
 }
 

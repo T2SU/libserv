@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 15:43:03 by smun              #+#    #+#             */
-/*   Updated: 2022/03/29 13:13:42 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 13:24:44 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,15 +16,6 @@
 #include <ctime>
 #include <iostream>
 #include <iomanip>
-
-#define RED "\e[31m"
-#define GREEN "\e[32m"
-#define YELLOW "\e[33m"
-#define RESET "\e[0m"
-
-#define CYAN "\e[36m"
-#define BLUE "\e[34m"
-#define PURPLE "\e[35m"
 
 const char* Log::GetPrefix(int level)
 {
@@ -39,9 +30,9 @@ const char* Log::GetPrefix(int level)
         case LogLevel_Warning:
             return "\033[33m[WARNING]";
         case LogLevel_Error:
-            return "\033[31m[ERROR]";
+            return "\033[35m[ERROR]";
         case LogLevel_Fatal:
-            return "\033[35m[FATAL]";
+            return "\033[31m[FATAL]";
         default:
             return "\033[0m";
     }

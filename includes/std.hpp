@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 12:25:54 by smun              #+#    #+#             */
-/*   Updated: 2022/03/28 21:11:51 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 13:28:54 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@
 #define TCP_MTU (1500 - 20 - 20)
 
 // line sperator (http/irc)
-#define LINE_SEPARATOR "\r\n"
+#define CRLF "\r\n"
+#define CRLF_SIZE sizeof(CRLF) - 1
 
 enum { IOEvent_Read = 1 << 0, IOEvent_Write = 1 << 1 };
 enum { IOFlag_Add = 1 << 0, IOFlag_Remove = 1 << 1, IOFlag_Enable = 1 << 2, IOFlag_Disable = 1 << 3 };

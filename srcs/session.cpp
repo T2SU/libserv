@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 15:32:11 by smun              #+#    #+#             */
-/*   Updated: 2022/03/29 13:14:55 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 13:28:50 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,22 +36,21 @@ Session::~Session()
 {
     if (_triggeredEvents)
         _attachedChannel->SetEvent(GetSocket(), _triggeredEvents, IOFlag_Remove, NULL);
-    _triggeredEvents &= ~_triggeredEvents;
+    _triggeredEvents = 0;
     Log::Vp("Session::~Session", "[%d/%s] 세션 인스턴스가 삭제됩니다.", GetSocket(), GetRemoteAddress().c_str());
 }
 
 bool    Session::GetNextLine(ByteBuffer& buffer, std::string& line)
 {
-    const size_t lineSepLen = std::strlen(LINE_SEPARATOR);
     const ByteBufferIterator begin = buffer.begin();
     const ByteBufferIterator end = buffer.end();
     ByteBufferIterator lineEnd;
 
-    lineEnd = std::search(begin, end, &LINE_SEPARATOR[0], &LINE_SEPARATOR[sizeof(LINE_SEPARATOR) - 1]);
+    lineEnd = std::search(begin, end, CRLF, CRLF + CRLF_SIZE);
     if (lineEnd != end)
     {
         line.assign(begin, lineEnd);
-        buffer.erase(begin, lineEnd + lineSepLen);
+        buffer.erase(begin, lineEnd + CRLF_SIZE);
         return true;
     }
     return false;
@@ -120,12 +119,12 @@ void    Session::Close()
 
 void    Session::Process(const std::string& line)
 {
-    Log::I("[R/%s] %s", _remoteAddress.c_str(), line.c_str());
+    Log::Ip("Session::Process", "[R/%s] %s", _remoteAddress.c_str(), line.c_str());
 }
 
 void    Session::Send(const std::string& line)
 {
-    Log::I("[S/%s] %s", _remoteAddress.c_str(), line.c_str());
+    Log::Ip("Session::Send", "[S/%s] %s", _remoteAddress.c_str(), line.c_str());
     Send(&line[0], line.length());
 }
 
@@ -134,6 +133,7 @@ void    Session::Send(const void* buf, size_t len)
     const Byte* const bytebuf = reinterpret_cast<const Byte*>(buf);
 
     _sendBuffer.insert(_sendBuffer.end(), bytebuf, bytebuf + len);
+    _sendBuffer.insert(_sendBuffer.end(), CRLF, CRLF + CRLF_SIZE);
     if (!(_triggeredEvents & IOEvent_Write))
     {
         _triggeredEvents |= IOEvent_Write;

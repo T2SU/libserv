@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 15:32:11 by smun              #+#    #+#             */
-/*   Updated: 2022/03/29 18:44:49 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 19:20:20 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,6 +163,8 @@ void    Session::Process(const std::string& line)
 
     // 한 줄에서 스페이스 문자로 구분
     split_arguments(args, line);
+    if (args.size() == 0)
+        return;
 
     // 명령어 처리
     if (args[0] == "HELLO")

@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 15:32:11 by smun              #+#    #+#             */
-/*   Updated: 2022/03/29 17:23:07 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 17:29:12 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,7 +120,6 @@ void    Session::Close()
 void    Session::Process(const std::string& line)
 {
     Log::Ip("Session::Process", "[R/%s] %s", _remoteAddress.c_str(), line.c_str());
-    Send(line);
 }
 
 void    Session::Send(const std::string& line)

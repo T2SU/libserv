@@ -6,7 +6,7 @@
 /*   By: smun <smun@student.42.fr>                  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/03/24 15:26:59 by smun              #+#    #+#             */
-/*   Updated: 2022/03/29 17:22:08 by smun             ###   ########.fr       */
+/*   Updated: 2022/03/29 17:29:41 by smun             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,20 +80,6 @@ private:
     void    TakeBuffer(size_t bytes);
 
     /**
-     * @brief crlf 개행으로 구분되어진 한 줄을 처리합니다.
-     * 
-     * @param line 읽어온 한 줄입니다.
-     */
-    void    Process(const std::string& line);
-
-    /**
-     * @brief 세션으로 문자열을 전송합니다. 문자열에는 여러 개행이 포함될 수 있으며, 클라이언트에서 이 개행을 각각 모두 분리하여 처리할 수도 있습니다.
-     * 
-     * @param line 세션으로 전송될 문자열.
-     */
-    void    Send(const std::string& line);
-
-    /**
      * @brief 세션으로 문자열을 전송합니다. 문자열에는 여러 개행이 포함될 수 있으며, 클라이언트에서 이 개행을 각각 모두 분리하여 처리할 수도 있습니다.
      * 
      * @param buf 세션으로 전송될 데이터의 포인터
@@ -109,6 +95,14 @@ private:
      * @return 개행을 발견했다면 line에 한 줄이 저장되고, 읽어온 데이터 만큼 버퍼에서 삭제합니다. 그리고 true가 반환됩니다. 개행이 없었다면 아무 것도 하지 않으며, false만 반환합니다.
      */
     static bool    GetNextLine(ByteBuffer& buffer, std::string& line);
+
+protected:
+    /**
+     * @brief crlf 개행으로 구분되어진 한 줄을 처리합니다.
+     * 
+     * @param line 읽어온 한 줄입니다.
+     */
+    virtual void    Process(const std::string& line);
 
 public:
     Session(Channel* channel, int socketfd, int socketId, const std::string& addr);
@@ -146,6 +140,13 @@ public:
      * @return 현재 세션의 IP 주소
      */
     const std::string&  GetRemoteAddress() const;
+
+    /**
+     * @brief 세션으로 문자열을 전송합니다. 문자열에는 여러 개행이 포함될 수 있으며, 클라이언트에서 이 개행을 각각 모두 분리하여 처리할 수도 있습니다.
+     * 
+     * @param line 세션으로 전송될 문자열.
+     */
+    void    Send(const std::string& line);
 };
 
 #endif
